@@ -6,7 +6,7 @@ var app = express()
 var body_parser = require('body-parser')
 app.use(body_parser.json())
 app.use(body_parser.urlencoded({ extended: true }))
-
+app.set('view engine', 'ejs')
 app.get("/", function (req, res) {
     res.sendFile(__dirname + '/register.html')
 });
@@ -21,17 +21,25 @@ app.post("/", function (req, res) {
 
         // var sql = "INSERT INTO students(name,email,mno) VALUES('"+name+"','"+email+"','"+mno+"')";
         // conn.query(sql, function (error, result) {
-        // var sql = "INSERT INTO students(name,email,mno) VALUES(?, ?, ?)";
-        // conn.query(sql, [name,email,mno],  function (error, result) {
-        var sql = "INSERT INTO students(name,email,mno) VALUES ?";
-        var values = [
-            [name,email,mno]
-        ];
-        conn.query(sql, [name,email,mno],  function (error, result) {
+        var sql = "INSERT INTO students(name,email,mno) VALUES(?, ?, ?)";
+        conn.query(sql, [name, email, mno], function (error, result) {
             if (error) throw error;
-            res.send("student register successfully" + result.insertId)
+            res.redirect("/students")
+            // res.send("student register successfully" + result.insertId)
         });
     });
 });
 
+app.get("/students", function (req, res) {
+    conn.connect(function (error) {
+        if (error) console.log(error);
+        var sql = "select * from students"
+        conn.query(sql, function (error, result) {
+            if (error) console.log(error);
+            res.render(__dirname+'/students.ejs',{students:result});
+        })
+    })
+})
+
 app.listen(7000);
+
